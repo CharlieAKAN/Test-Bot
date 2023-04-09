@@ -1,5 +1,7 @@
-const { getRandomConversationStarter } = require('./commands.js');
 const { commands } = require('./commands.js');
+
+const userConversationLogs = new Map();
+const lastMessageTimestamp = new Map();
 
 function eventHandlers(client, openai) {
   client.on('ready', () => {
@@ -17,9 +19,6 @@ function eventHandlers(client, openai) {
       channel.send(`Hello, <@${newMember.id}>! You have been assigned the ${roleName} role. Please join Streamer VC when you are ready!`);
     }
   });
-
-  const userConversationLogs = new Map();
-  const lastMessageTimestamp = Date.now();
 
   commands(client, openai);
 }

@@ -1,7 +1,6 @@
-const PREFIX = process.env.PREFIX || '!';
+const { openai } = require('./openai');
 
-const userConversationLogs = require('./event.js').userConversationLogs;
-const lastMessageTimestamp = require('./event.js').lastMessageTimestamp;
+const PREFIX = process.env.PREFIX || '!';
 
 const TOPICS = [
   'movie facts',
@@ -24,7 +23,7 @@ async function generateConversationStarter(topic) {
     }
   ];
     
-const result = await openai
+  const result = await openai
     .createChatCompletion({
       model: 'gpt-3.5-turbo',
       messages: conversationLog,
@@ -36,22 +35,14 @@ const result = await openai
       console.log(`OPENAI ERR: ${error}`);
       console.log('Error response:', error.response.data); // Add this line
     });
+
+  return result.data.choices[0].message.content;
 }
 
-const userConversationLogs = new Map();
-const CONVERSATION_LOG_LIMIT = 10;
-
-client.on('guildMemberUpdate', async (oldMember, newMember) => {
-  const roleName = 'Join Streamers';
-  const channelId = process.env.JOIN_CHANNEL_ID;
-
-  const role = newMember.guild.roles.cache.find(role => role.name === roleName);
-
-  if (!oldMember.roles.cache.has(role.id) && newMember.roles.cache.has(role.id)) {
-    const channel = newMember.guild.channels.cache.get(channelId);
-    channel.send(`Hello, <@${newMember.id}>! You have been assigned the ${roleName} role. Please join Streamer VC when you are ready!`);
-  }
-});
+async function getRandomConversationStarter() {
+  const randomTopic = TOPICS[Math.floor(Math.random() * TOPICS.length)];
+  return await generateConversationStarter(randomTopic);
+}
 
 function commands(client, openai) {
   client.on('messageCreate', async (message) => {
@@ -62,13 +53,22 @@ function commands(client, openai) {
     const args = message.content.slice(PREFIX.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
 
-  if (command === 'help') {
-    // Send a list of available commands
-    message.channel.send('Available commands:\n- help\n- topic');
-  } file
+    if (command === 'help') {
+      // Send a list of available commands
+      message.channel.send('Available commands:\n- help\n- topic');
+    }
+
+    if (command === 'topic') {
+      const topic = args.join(' ');
+      const conversationStarter = await generateConversationStarter(topic);
+      message.channel.send(conversationStarter);
+    }
   });
 }
 
 module.exports = {
   commands,
+  TOPICS,
+  generateConversationStarter,
+  getRandomConversationStarter,
 };
