@@ -1,18 +1,16 @@
-const IntentsBitField = require('discord.js').IntentsBitField;
+// config.js
+const PREFIX = process.env.PREFIX || '!';
+const TOPICS = [
+  'movie facts',
+  'gaming history',
+  'the best video games',
+  'video games from 1990 to 2020',
+  'game character',
+];
+const CONVERSATION_LOG_LIMIT = 10; // Adjust the limit as needed
 
-const CONFIG = {
-  intents: [
-    IntentsBitField.Flags.Guilds,
-    IntentsBitField.Flags.GuildMessages,
-    IntentsBitField.Flags.MessageContent,
-    IntentsBitField.Flags.GuildMembers,
-  ],
-  prefix: process.env.PREFIX || '!',
-  joinChannelId: process.env.JOIN_CHANNEL_ID,
-  channelId: process.env.CHANNEL_ID,
-  token: process.env.TOKEN,
-  roleName: 'Join Streamers',
-  conversationLogLimit: 10,
+module.exports = {
+  PREFIX,
+  TOPICS,
+  CONVERSATION_LOG_LIMIT,
 };
-
-module.exports = CONFIG;

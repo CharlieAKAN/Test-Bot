@@ -1,0 +1,13 @@
+async function sendTyping(channel) {
+  return new Promise((resolve) => {
+    channel.sendTyping().then(() => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
+  });
+}
+
+module.exports = {
+  sendTyping,
+};

@@ -1,16 +1,35 @@
+// main.js
 require('dotenv/config');
-const { Client } = require('discord.js');
-const CONFIG = require('./config.js');
-const EVENTS = require('./events.js');
+const { Client, IntentsBitField } = require('discord.js');
+const { getRandomConversationStarter } = require('./openai');
 
 const client = new Client({
-  intents: CONFIG.intents,
+  intents: [
+    IntentsBitField.Flags.Guilds,
+    IntentsBitField.Flags.GuildMessages,
+    IntentsBitField.Flags.MessageContent,
+    IntentsBitField.Flags.GuildMembers,
+  ],
 });
 
-client.on('ready', EVENTS.ready);
-client.on('guildMemberUpdate', EVENTS.guildMemberUpdate);
-client.on('messageCreate', EVENTS.messageCreate);
+// Export the client
+module.exports.client = client;
 
-// ... your setInterval code ...
+// Import the events
+require('./events');
 
-client.login(CONFIG.token);
+let lastMessageTimestamp = Date.now();
+
+setInterval(async () => {
+  const currentTime = Date.now();
+  const timeSinceLastMessage = currentTime - lastMessageTimestamp;
+  const idleTimeLimit = 120 * 60 * 1000; // 2 hours in milliseconds
+  if (timeSinceLastMessage >= idleTimeLimit) {
+    const channel = client.channels.cache.get(process.env.CHANNEL_ID);
+    const conversationStarter = await getRandomConversationStarter();
+    channel.send(conversationStarter);
+    lastMessageTimestamp = Date.now();
+  }
+}, 60 * 1000); // Check every minute
+
+client.login(process.env.TOKEN);
