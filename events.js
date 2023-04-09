@@ -1,7 +1,7 @@
-// events.js
 const { client } = require('./main');
 const { handleCommand } = require('./commands');
 const { PREFIX } = require('./config');
+const eventEmitter = require('./eventEmitter');
 
 client.on('ready', () => {
   console.log('The bot is online!');
@@ -30,13 +30,5 @@ client.on('messageCreate', async (message) => {
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
 
-  const isMention = message.content.startsWith(`<@!${client.user.id}>`) || message.content.startsWith(`<@${client.user.id}>`);
-  const isReply = message.reference && message.reference.messageId && (await message.channel.messages.fetch(message.reference.messageId)).author.id === client.user.id;
-
-  if (isMention || isReply) {
-    message.channel.sendTyping(); // Add typing indicator
-    handleCommand(command, args, message);
-  } else if (message.content.startsWith(PREFIX)) {
-    handleCommand(command, args, message);
-  }
+  handleCommand(command, args, message, client);
 });
